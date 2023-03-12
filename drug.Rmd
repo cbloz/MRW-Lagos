@@ -1,0 +1,36 @@
+---
+title: "Untitled"
+author: "OPS"
+date: "12/03/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```r
+setwd("~/Desktop/Papers/drugmr/afr")
+HMGCR_AFRsnps <- read.csv("~/Desktop/Papers/drugmr/afr/HMGCR_AFRsnps.txt", sep="")
+head(HMGCR_AFRsnps)
+strokesnps <- read.table("~/Desktop/Papers/drugmr/afr/HMGCR_AFRsnps_in_Stroke.txt", quote="\"", comment.char="")
+head(strokesnps)
+colnames(strokesnps) <- c("snp","CHR","BP","EAF","BETA","SE","P","OR","CIL","CIU","EA","NEA")
+column <- data.frame(HMGCR_AFRsnps$CHROM.POS_b37,HMGCR_AFRsnps$rsID)
+head(column)
+colnames(column) <- c("snp","RSID")
+merge <- merge(x = column, y = strokesnps, by = "snp")
+head(merge)
+strokesnps <- merge
+head(strokesnps)
+Exp_format <- format_data(HMGCR_AFRsnps, header = TRUE, snp_col = "rsID", beta_col = "EFFECT_SIZE", se_col = "SE", effect_allele_col = "ALT", other_allele_col = "REF", eaf_col = "POOLED_ALT_AF", pval_col = "pvalue")
+Out_format <- format_data(strokesnps, header = TRUE, type = "outcome", snp_col = "RSID", beta_col = "BETA", se_col = "SE", effect_allele_col = "EA", other_allele_col = "NEA", eaf_col = "EAF", pval_col = "P")
+Exp_Out_Harmonized <- harmonise_data(exposure_dat = Exp_format, outcome_dat = Out_format, action = 2)
+Exp_Out_Harmonized <- subset(Exp_Out_Harmonized, pval.exposure<=0.00000005)
+Exp_Out_Harmonized_Clumped <- clump_data(Exp_Out_Harmonized,clump_r2 = 0.3,pop = "AFR")
+write.table(Exp_Out_Harmonized_Clumped, file = "HMGCR_AFR_exp_out_clump.txt", row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
+res <- mr(Exp_Out_Harmonized_Clumped)
+res
+res$up_ci <- as.numeric(res$b) + 1.96 * as.numeric(res$se)
+res$lo_ci <- as.numeric(res$b) - 1.96 * as.numeric(res$se)
+generate_odds_ratios(res)
+```
