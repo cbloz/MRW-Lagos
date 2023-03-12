@@ -1,0 +1,9 @@
+﻿snp,rsid,chr,pos,Other,Reference,trait,ancestry,beta,se,direction,unit,dataset,EAF
+rs4007642,rs4007642,9,22093300,A,T,Rheumatoid arthritis,East Asian,-0.0041,0.0212,+,log OR,Stahl-E_RA_EUR_2010,na
+rs3176336,rs3176336,6,36681039,A,T,Rheumatoid arthritis,East Asian,0.0224,0.0227,-,log OR,Stahl-E_RA_EUR_2010,0.7593
+rs11172113,rs11172113,12,57133500,C,T,Rheumatoid arthritis,East Asian,0.0265,0.0211,+,log OR,Stahl-E_RA_EUR_2010,na
+rs1412445,rs1412445,10,89243047,T,C,Rheumatoid arthritis,East Asian,0.0379,0.0875,+,log OR,Stahl-E_RA_EUR_2010,0.3175
+rs646776,rs646776,1,109275908,A,G,Rheumatoid arthritis,East Asian,-0.01644,0.01198,-,log OR,Stahl-E_RA_EUR_2010,na
+rs964184,rs964184,11,116778201,G,C,Rheumatoid arthritis,East Asian,-0.06133,0.02542,-,log OR,Stahl-E_RA_EUR_2010,0.6774
+rs10808546,rs10808546,8,125483576,C,T,Rheumatoid arthritis,East Asian,0.1508,0.0503,+,log OR,Stahl-E_RA_EUR_2010,0.877
+rs12730935,rs12730935,1,154447416,A,G,Rheumatoid arthritis,East Asian,0.0145,0.0202,+,log OR,Stahl-E_RA_EUR_2010,na
