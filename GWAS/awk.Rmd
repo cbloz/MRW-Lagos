@@ -1,0 +1,87 @@
+---
+title: "Awk"
+author: "OPS"
+date: "3/19/2023"
+output: html_document
+---
+
+# Awk is a command-line utility for text processing. It can be used to extract and manipulate data from text files.
+
+1. We can scan a file line by line.
+2. Performs action(s) if match found in line(s)
+3. Arithmetic and String operations
+4. Format output lines
+5. Apply conditions and loops
+
+
+# Awk special field identifiers and Built-in Variables
+
+Special field identifier returns the value available at the mentioned identifier's location.
+
+$0: Represents the entire line of a record.
+$1: Represents the first field of a line.
+$NF: It refers to the "number of fields" and represents the last field of the line.
+NF - contains the number of fields in the file (or record).
+NR - contain a number of the current lines (or record).
+FILENAME - contain the name of an input file that is currently in use.
+FS - used for field separator.
+RS - used for record separator.
+OFS - used for output field separator.
+ORS - used for output record separator.
+
+## Print a file:
+1. The default behavior of the awk command is to print every line of record from the input file.
+```r
+awk '{print}' T2DM.txt 
+```
+
+2. Print the line that matches input data:
+```r
+awk '/rs11206510/ {print}' T2DM.txt 
+```
+
+3. Print all the line that doesn't match an input data:
+```r
+awk '!/rs11206510/ {print}' T2DM.txt 
+```
+
+4. Splitting a line into fields :
+```r
+awk '{print $1,$4}' T2DM.txt 
+```
+5. Use of NR built-in variables (Display Line Number)
+```r
+awk '{print NR,$0}' T2DM.txt  
+```
+6. Use of NF built-in variables (Display Last Field)
+```r
+awk '{print $1,$NF}' T2DM.txt
+```
+7. Another use of NR built-in variables (Display Line From 2 to 5)
+```r
+awk 'NR==2, NR==5 {print NR,$0}' T2DM.txt  
+```
+8. To count the total lines in a file:
+```r
+awk 'END { print NR }' T2DM.txt
+```
+9. Using awk to print values greater or less than a value
+```r
+awk '$11 >= 842557  { print $0 ;}' T2DM.txt 
+```
+10. Seperating fields
+```r
+sed 's/:/ /g' T2DM.txt 
+```
+11. Looking for common fields
+```r
+awk 'NR==FNR ? a[$1] : $1 in a' T2DM2.txt T2DM.txt 
+```
+12. Arithmetic function
+```r
+awk '{print ($8)*-1}' T2DM.txt
+```
+13. Use tab as field seperator
+```r
+awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 }' T2DM.txt
+```
