@@ -1,0 +1,133 @@
+---
+title: "tsmr"
+author: "OPS"
+date: "3/17/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+# Two sample Mendelian randomization using the TwoSampleMR package
+
+## Install and load required packages
+
+```r
+install.packages("TwoSampleMR")
+library(dplyr)
+library(data.table)
+library(TwoSampleMR)
+library(ggplot2)
+```
+
+## Set working directory
+```r
+setwd("~/Desktop/MRW/MR_Materials/tsmr")
+```
+
+### Load in Exposure Data
+```r
+exp <- read.table("~/Desktop/MRW/MR_Materials/tsmr/exposure", quote="\"", comment.char="")
+```
+
+### View the structure of the data using str and head
+```
+str(exp)
+head(exp)
+```
+
+### Add header
+```r
+colnames(exp) <- c("snp","chrbp","chr","bp","ref","alt","n","N_studies","POOLED_ALT_AF","EFFECT_SIZE","SE","pvalue_neg_log10","pvalue","pvalue_neg_log10_GC","pvalue_GC")
+```
+
+### Format the Exposure data to comply with TSMR package
+```r
+expformated <- format_data(exp, header = TRUE, type = "exposure", snp_col = "snp", beta_col = "EFFECT_SIZE", se_col = "SE", effect_allele_col = "alt", other_allele_col = "ref", eaf_col = "POOLED_ALT_AF", pval_col = "pvalue")
+```
+
+### Load the Outcome Data
+```r
+out <- read.table("~/Desktop/MRW/MR_Materials/tsmr/outcome", quote="\"", comment.char="")
+```
+### View the structure of the outcome data using str and head
+
+```r
+str(out)
+head(out)
+```
+### Add header name to the outcome data
+```r
+colnames(out) <- c("chrbp","chr","bp","ea","nea","eaf","beta", "se", "p","n","OR")
+```
+```r
+column <- data.frame(exp$snp,exp$chrbp)
+head(column)
+colnames(column) <- c("snp","chrbp")
+merge <- merge(x = column, y = out, by = "chrbp")
+head(merge)
+out<- merge
+```
+
+### Format the Outcome data to comply with TSMR package
+```r
+outformated <- format_data(out, header = TRUE, type = "outcome", snp_col = "snp", beta_col = "beta", se_col = "se", effect_allele_col = "ea", other_allele_col = "nea", eaf_col = "eaf", pval_col = "p")
+```
+
+### Harmonize both exposure and outcome
+*Note: there are different harmonization fuction depending on what we want to do with palindromic SNPs. This shall be explained in details.*
+```r
+harmonized <- harmonise_data(exposure_dat = expformated, outcome_dat = outformated, action = 3)
+```
+write.table(harmonized, file = "harmonized.txt", row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
+
+### Perform clumping
+*Also take note of the different clumping threshold. Vary the clumping threshold and see how that impacts the results.*
+```r
+Exp_Out_Harmonized_Clumped <- clump_data(harmonized,clump_kb = 10000,clump_r2 = 0.1,clump_p1 = 1,clump_p2 = 1,pop = "EUR")
+```
+
+### Perform MR analysis
+```r
+res <- mr(Exp_Out_Harmonized_Clumped)
+res
+```
+```r
+res <- generate_odds_ratios(res)
+```
+
+```r
+write.table(res, file = "result.txt", row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
+```
+
+
+## Generate Plots
+```r
+plot <- read.delim("~/Desktop/MRW/MR_Materials/tsmr/plot.txt")
+p = ggplot(data=plot,
+           aes(x = Group,y = RiskRatio, ymin = LowerLimit, ymax = UpperLimit ))+
+  geom_pointrange(aes(col=Group),shape=18)+
+  geom_hline(aes(fill=Group),yintercept =1, linetype=3)+
+  xlab('Group')+ ylab("Odd Ratio (95% Confidence Interval)")+
+  geom_errorbar(aes(ymin=LowerLimit, ymax=UpperLimit,col=Group),width=0.5,cex=0)+
+  facet_wrap(~Condition,strip.position="left",nrow=15,scales = "free_y") +
+  theme(plot.title=element_text(size=8,face="bold"),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x=element_text(face="bold"),
+        axis.title=element_text(size=10,face="bold"),
+        strip.text.y = element_text(hjust=0,vjust = 1,angle=180,face="bold"))+
+  coord_flip()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                     panel.background = element_blank())
+p
+```
+
+## Now perform the MR again by varying the clumping threshold
